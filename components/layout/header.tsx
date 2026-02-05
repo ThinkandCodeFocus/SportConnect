@@ -1,0 +1,214 @@
+"use client"
+
+import Link from "next/link"
+import { useState } from "react"
+import {
+  Home,
+  Users,
+  Briefcase,
+  MessageSquare,
+  Bell,
+  Search,
+  Building2,
+  Menu,
+  X,
+  ChevronDown,
+  Settings,
+  LogOut,
+  User,
+  Bookmark,
+  FileText,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+
+const navItems = [
+  { href: "/", icon: Home, label: "Accueil" },
+  { href: "/network", icon: Users, label: "Réseau" },
+  { href: "/jobs", icon: Briefcase, label: "Offres" },
+  { href: "/messaging", icon: MessageSquare, label: "Messagerie", notifications: 3 },
+  { href: "/notifications", icon: Bell, label: "Notifications", notifications: 12 },
+  { href: "/clubs", icon: Building2, label: "Clubs" },
+]
+
+export function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [searchFocused, setSearchFocused] = useState(false)
+
+  return (
+    <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex items-center justify-between h-14">
+          {/* Logo and Search */}
+          <div className="flex items-center gap-2 lg:gap-4 flex-1 max-w-md">
+            <Link href="/" className="flex items-center gap-2 shrink-0">
+              <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-lg">SC</span>
+              </div>
+              <span className="hidden xl:block font-semibold text-foreground">SportConnect</span>
+            </Link>
+            <div className={`relative flex-1 transition-all ${searchFocused ? "lg:flex-none lg:w-80" : ""}`}>
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Rechercher..."
+                className="pl-9 bg-secondary border-none h-9 text-sm"
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
+              />
+            </div>
+          </div>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex flex-col items-center px-4 py-2 text-muted-foreground hover:text-foreground transition-colors relative group"
+              >
+                <div className="relative">
+                  <item.icon className="h-5 w-5" />
+                  {item.notifications && (
+                    <Badge className="absolute -top-2 -right-2 h-4 min-w-4 p-0 flex items-center justify-center text-[10px] bg-destructive text-destructive-foreground">
+                      {item.notifications > 9 ? "9+" : item.notifications}
+                    </Badge>
+                  )}
+                </div>
+                <span className="text-xs mt-0.5">{item.label}</span>
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-primary group-hover:w-full transition-all" />
+              </Link>
+            ))}
+          </nav>
+
+          {/* User Menu */}
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="hidden lg:flex items-center gap-1 px-2 h-auto py-1.5">
+                  <Avatar className="h-7 w-7">
+                    <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" />
+                    <AvatarFallback>KM</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col items-start text-left">
+                    <span className="text-xs font-medium text-foreground">Moi</span>
+                    <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-72">
+                <div className="p-3 border-b border-border">
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-14 w-14">
+                      <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" />
+                      <AvatarFallback>KM</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground">Karim Mbappé</p>
+                      <p className="text-sm text-muted-foreground truncate">Milieu offensif - Ligue 1</p>
+                      <p className="text-xs text-muted-foreground">Olympique de Marseille</p>
+                    </div>
+                  </div>
+                  <Link href="/profile">
+                    <Button variant="outline" className="w-full mt-3 h-8 text-sm border-primary text-primary hover:bg-primary/5 bg-transparent">
+                      Voir le profil
+                    </Button>
+                  </Link>
+                </div>
+                <div className="p-1">
+                  <p className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Compte</p>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings" className="flex items-center gap-2">
+                      <Settings className="h-4 w-4" />
+                      Paramètres et confidentialité
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/saved" className="flex items-center gap-2">
+                      <Bookmark className="h-4 w-4" />
+                      Éléments enregistrés
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/applications" className="flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Mes candidatures
+                    </Link>
+                  </DropdownMenuItem>
+                </div>
+                <DropdownMenuSeparator />
+                <div className="p-1">
+                  <DropdownMenuItem className="text-destructive focus:text-destructive">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Déconnexion
+                  </DropdownMenuItem>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <nav className="lg:hidden py-2 border-t border-border">
+            <div className="grid grid-cols-3 gap-1">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex flex-col items-center p-3 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <div className="relative">
+                    <item.icon className="h-5 w-5" />
+                    {item.notifications && (
+                      <Badge className="absolute -top-1 -right-1 h-4 min-w-4 p-0 flex items-center justify-center text-[10px] bg-destructive text-destructive-foreground">
+                        {item.notifications}
+                      </Badge>
+                    )}
+                  </div>
+                  <span className="text-xs mt-1">{item.label}</span>
+                </Link>
+              ))}
+            </div>
+            <div className="mt-2 pt-2 border-t border-border">
+              <Link
+                href="/profile"
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" />
+                  <AvatarFallback>KM</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium text-foreground">Karim Mbappé</p>
+                  <p className="text-sm text-muted-foreground">Voir le profil</p>
+                </div>
+              </Link>
+            </div>
+          </nav>
+        )}
+      </div>
+    </header>
+  )
+}
