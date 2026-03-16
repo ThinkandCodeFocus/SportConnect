@@ -1,175 +1,140 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import {
-  Camera,
-  MapPin,
-  Award,
-  Users,
-  MessageSquare,
-  MoreHorizontal,
-  Pencil,
-  Share2,
-  UserPlus,
-  Check,
-} from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { User, UserProfile } from "@/lib/types/api";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Calendar, Building2, Mail, Phone, ExternalLink, Edit } from "lucide-react";
+import { useState } from "react";
+import { EditProfileDialog } from "./edit-profile-dialog";
 
-export function ProfileHeader() {
-  const [isConnected, setIsConnected] = useState(false)
+interface ProfileHeaderProps {
+  user: User;
+  profile: UserProfile | null;
+}
+
+export function ProfileHeader({ user, profile }: ProfileHeaderProps) {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  const getUserInitials = () => {
+    return `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase();
+  };
+
+  const getRoleLabel = () => {
+    const roleLabels: Record<string, string> = {
+      PLAYER: "Joueur",
+      COACH: "Entraîneur",
+      AGENT: "Agent",
+      SCOUT: "Recruteur",
+      CLUB_ADMIN: "Admin Club",
+      FAN: "Fan",
+    };
+    return roleLabels[user.role] || user.role;
+  };
 
   return (
-    <Card className="overflow-hidden">
-      {/* Banner */}
-      <div className="relative h-32 sm:h-48 lg:h-56 bg-gradient-to-r from-primary/80 via-primary to-primary/60">
-        <Image
-          src="https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=1200&h=400&fit=crop"
-          alt="Profile banner"
-          fill
-          className="object-cover mix-blend-overlay opacity-50"
+    <>
+      <div className="bg-card rounded-lg border border-border overflow-hidden">
+        {/* Cover Photo */}
+        <div 
+          className="h-48 bg-gradient-to-r from-primary to-primary/60"
+          style={{
+            backgroundImage: profile?.coverPhoto ? `url(${profile.coverPhoto})` : undefined,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
         />
-        <Button
-          variant="secondary"
-          size="sm"
-          className="absolute bottom-4 right-4 gap-2 opacity-90 hover:opacity-100"
-        >
-          <Camera className="h-4 w-4" />
-          <span className="hidden sm:inline">Modifier la bannière</span>
-        </Button>
-      </div>
-
-      <CardContent className="relative pt-0 pb-6">
-        {/* Avatar */}
-        <div className="absolute -top-16 sm:-top-20 left-4 sm:left-6">
-          <div className="relative">
-            <Avatar className="h-28 w-28 sm:h-36 sm:w-36 border-4 border-card shadow-lg">
-              <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face" />
-              <AvatarFallback className="text-3xl">KM</AvatarFallback>
-            </Avatar>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="absolute bottom-0 right-0 h-8 w-8 rounded-full shadow"
-            >
-              <Camera className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Actions - Desktop */}
-        <div className="flex justify-end pt-2 gap-2">
-          <Button variant="outline" size="sm" className="gap-2 hidden sm:flex bg-transparent">
-            <Share2 className="h-4 w-4" />
-            Partager
-          </Button>
-          <Button variant="outline" size="sm" className="gap-2 bg-transparent">
-            <MessageSquare className="h-4 w-4" />
-            <span className="hidden sm:inline">Message</span>
-          </Button>
-          <Button
-            size="sm"
-            className="gap-2"
-            variant={isConnected ? "secondary" : "default"}
-            onClick={() => setIsConnected(!isConnected)}
-          >
-            {isConnected ? (
-              <>
-                <Check className="h-4 w-4" />
-                <span className="hidden sm:inline">Connecté</span>
-              </>
-            ) : (
-              <>
-                <UserPlus className="h-4 w-4" />
-                <span className="hidden sm:inline">Se connecter</span>
-              </>
-            )}
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="h-9 w-9 bg-transparent">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <Pencil className="h-4 w-4 mr-2" />
-                Modifier le profil
-              </DropdownMenuItem>
-              <DropdownMenuItem>Enregistrer en PDF</DropdownMenuItem>
-              <DropdownMenuItem>Copier le lien</DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">Bloquer</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
 
         {/* Profile Info */}
-        <div className="mt-12 sm:mt-16">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Karim Mbappé</h1>
-                <Award className="h-6 w-6 text-primary fill-primary" />
-              </div>
-              <p className="text-lg text-muted-foreground mt-1">Milieu offensif | Ligue 1</p>
-              <div className="flex flex-wrap items-center gap-3 mt-3 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  Marseille, France
-                </span>
-                <Link href="/clubs/om" className="text-primary hover:underline font-medium">
-                  Olympique de Marseille
-                </Link>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-4">
-                <Badge className="bg-primary/10 text-primary hover:bg-primary/20">Football</Badge>
-                <Badge variant="secondary">Semi-professionnel</Badge>
-                <Badge variant="outline">Milieu de terrain</Badge>
-              </div>
-            </div>
-          </div>
+        <div className="px-6 pb-6">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 -mt-16 sm:-mt-12">
+            {/* Avatar */}
+            <Avatar className="h-32 w-32 border-4 border-card">
+              <AvatarImage src={profile?.profilePicture} />
+              <AvatarFallback className="text-2xl">{getUserInitials()}</AvatarFallback>
+            </Avatar>
 
-          {/* Stats */}
-          <div className="flex flex-wrap items-center gap-6 mt-6 pt-6 border-t border-border">
-            <Link href="/profile/connections" className="text-center hover:bg-secondary px-3 py-2 rounded-lg transition-colors">
-              <p className="text-xl font-bold text-foreground">847</p>
-              <p className="text-sm text-muted-foreground">connexions</p>
-            </Link>
-            <div className="text-center px-3 py-2">
-              <p className="text-xl font-bold text-foreground">234</p>
-              <p className="text-sm text-muted-foreground">vues du profil</p>
-            </div>
-            <div className="text-center px-3 py-2">
-              <p className="text-xl font-bold text-foreground">56</p>
-              <p className="text-sm text-muted-foreground">publications</p>
-            </div>
-            <div className="flex items-center gap-2 ml-auto">
-              <div className="flex -space-x-2">
-                {[1, 2, 3].map((i) => (
-                  <Avatar key={i} className="h-8 w-8 border-2 border-card">
-                    <AvatarImage src={`https://images.unsplash.com/photo-${1500000000000 + i * 7000000}?w=50&h=50&fit=crop&crop=face`} />
-                    <AvatarFallback>U</AvatarFallback>
-                  </Avatar>
-                ))}
+            {/* Name and Actions */}
+            <div className="flex-1 pt-16 sm:pt-12">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-foreground">
+                    {user.firstName} {user.lastName}
+                  </h1>
+                  <p className="text-lg text-muted-foreground mt-1">
+                    {profile?.position || getRoleLabel()}
+                  </p>
+                  {profile?.currentClub && (
+                    <div className="flex items-center gap-2 mt-2 text-muted-foreground">
+                      <Building2 className="h-4 w-4" />
+                      <span>{profile.currentClub}</span>
+                    </div>
+                  )}
+                </div>
+
+                <Button onClick={() => setIsEditDialogOpen(true)}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Modifier le profil
+                </Button>
               </div>
-              <span className="text-sm text-muted-foreground">
-                <Users className="h-4 w-4 inline mr-1" />
-                12 connexions en commun
-              </span>
+
+              {/* Info Tags */}
+              <div className="flex flex-wrap gap-4 mt-4">
+                {profile?.location && (
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    <span>{profile.location}{profile.country && `, ${profile.country}`}</span>
+                  </div>
+                )}
+                
+                {user.email && (
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Mail className="h-4 w-4" />
+                    <span>{user.email}</span>
+                  </div>
+                )}
+
+                {user.phone && (
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Phone className="h-4 w-4" />
+                    <span>{user.phone}</span>
+                  </div>
+                )}
+
+                {user.createdAt && (
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    <span>Membre depuis {new Date(user.createdAt).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Skills/Languages */}
+              {(profile?.skills || profile?.languages) && (
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {profile?.skills?.map((skill, index) => (
+                    <Badge key={`skill-${index}`} variant="secondary">
+                      {skill}
+                    </Badge>
+                  ))}
+                  {profile?.languages?.map((lang, index) => (
+                    <Badge key={`lang-${index}`} variant="outline">
+                      {lang}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
-  )
+      </div>
+
+      <EditProfileDialog
+        user={user}
+        profile={profile}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+      />
+    </>
+  );
 }

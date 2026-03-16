@@ -1,383 +1,248 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
+import { User, CreatePostRequest } from "@/lib/types/api";
+import api from "@/lib/api/endpoints";
 import {
   ImageIcon,
   Video,
   Trophy,
-  BarChart3,
-  Briefcase,
-  FileText,
-} from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+  X,
+  Loader2,
+} from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { PostData } from "./post-card"
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const postTypes = [
-  { id: "photo", icon: ImageIcon, label: "Photo", color: "text-blue-600" },
-  { id: "video", icon: Video, label: "Vidéo", color: "text-green-600" },
-  { id: "performance", icon: Trophy, label: "Performance", color: "text-yellow-600" },
-  { id: "stats", icon: BarChart3, label: "Stats", color: "text-primary" },
-  { id: "job", icon: Briefcase, label: "Offre", color: "text-orange-600" },
-  { id: "article", icon: FileText, label: "Article", color: "text-red-600" },
-]
+  { id: "TEXT", icon: ImageIcon, label: "Texte", color: "text-blue-600" },
+  { id: "IMAGE", icon: ImageIcon, label: "Photo", color: "text-green-600" },
+  { id: "VIDEO", icon: Video, label: "Vidéo", color: "text-red-600" },
+  { id: "PERFORMANCE", icon: Trophy, label: "Performance", color: "text-yellow-600" },
+];
 
 interface CreatePostProps {
-  onPostCreated: (post: PostData) => void
+  onPostCreated: (post: any) => void;
+  currentUser: User;
 }
 
-export function CreatePost({ onPostCreated }: CreatePostProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [content, setContent] = useState("")
-  const [selectedTab, setSelectedTab] = useState("post")
-  
-  // Performance form state
-  const [matchName, setMatchName] = useState("")
-  const [matchResult, setMatchResult] = useState("")
-  const [goals, setGoals] = useState("")
-  const [assists, setAssists] = useState("")
-  const [rating, setRating] = useState("")
-  
-  // Job form state
-  const [jobTitle, setJobTitle] = useState("")
-  const [jobLocation, setJobLocation] = useState("")
-  const [jobLevel, setJobLevel] = useState("")
-  const [jobSalary, setJobSalary] = useState("")
-  const [jobDescription, setJobDescription] = useState("")
+export function CreatePost({ onPostCreated, currentUser }: CreatePostProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [content, setContent] = useState("");
+  const [postType, setPostType] = useState<"TEXT" | "IMAGE" | "VIDEO" | "PERFORMANCE">("TEXT");
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const getUserInitials = () => {
+    return `${currentUser.firstName?.[0] || ""}${currentUser.lastName?.[0] || ""}`.toUpperCase();
+  };
 
   const resetForm = () => {
-    setContent("")
-    setMatchName("")
-    setMatchResult("")
-    setGoals("")
-    setAssists("")
-    setRating("")
-    setJobTitle("")
-    setJobLocation("")
-    setJobLevel("")
-    setJobSalary("")
-    setJobDescription("")
-  }
+    setContent("");
+    setPostType("TEXT");
+    setMediaUrl("");
+    setError("");
+  };
 
-  const handlePublishPost = () => {
-    if (!content.trim()) return
-    
-    const newPost: PostData = {
-      id: Date.now(),
-      author: {
-        name: "Karim Mbappé",
-        role: "Attaquant • Paris Saint-Germain",
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-        isVerified: false,
-      },
-      content: content,
-      type: "text",
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      timeAgo: "À l'instant",
+  const handlePublish = async () => {
+    if (!content.trim()) {
+      setError("Le contenu ne peut pas être vide");
+      return;
     }
-    
-    onPostCreated(newPost)
-    resetForm()
-    setIsOpen(false)
-  }
 
-  const handlePublishPerformance = () => {
-    if (!matchName.trim() || !matchResult.trim()) return
-    
-    const stats = []
-    if (goals) stats.push({ label: "Buts", value: goals })
-    if (assists) stats.push({ label: "Passes décisives", value: assists })
-    if (rating) stats.push({ label: "Note", value: rating })
-    
-    const newPost: PostData = {
-      id: Date.now(),
-      author: {
-        name: "Karim Mbappé",
-        role: "Attaquant • Paris Saint-Germain",
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-        isVerified: false,
-      },
-      content: content || `Performance du match ${matchName}`,
-      type: "performance",
-      performance: {
-        match: matchName,
-        result: matchResult,
-        stats: stats.length > 0 ? stats : [{ label: "Match joué", value: "Oui" }],
-      },
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      timeAgo: "À l'instant",
+    if ((postType === "IMAGE" || postType === "VIDEO") && !mediaUrl.trim()) {
+      setError("Veuillez fournir une URL pour le média");
+      return;
     }
-    
-    onPostCreated(newPost)
-    resetForm()
-    setIsOpen(false)
-  }
 
-  const handlePublishJob = () => {
-    if (!jobTitle.trim()) return
-    
-    const newPost: PostData = {
-      id: Date.now(),
-      author: {
-        name: "Karim Mbappé",
-        role: "Attaquant • Paris Saint-Germain",
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-        isVerified: false,
-      },
-      content: jobDescription || `Nouvelle offre : ${jobTitle}`,
-      type: "job",
-      job: {
-        title: jobTitle,
-        club: "Mon organisation",
-        location: jobLocation || "France",
-        level: jobLevel || "Professionnel",
-        salary: jobSalary || "Selon profil",
-      },
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      timeAgo: "À l'instant",
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      const postData: CreatePostRequest = {
+        content: content.trim(),
+        type: postType,
+        mediaUrl: mediaUrl.trim() || undefined,
+      };
+
+      const response = await api.post.create(postData);
+      onPostCreated(response.data);
+      resetForm();
+      setIsOpen(false);
+    } catch (err: any) {
+      console.error("Failed to create post:", err);
+      setError(err.message || "Échec de la publication");
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    onPostCreated(newPost)
-    resetForm()
-    setIsOpen(false)
-  }
+  };
 
   return (
     <Card>
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          <Avatar className="h-12 w-12">
-            <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" />
-            <AvatarFallback>KM</AvatarFallback>
-          </Avatar>
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-              <button
-                type="button"
-                className="flex-1 text-left px-4 py-3 rounded-full border border-border bg-secondary/50 text-muted-foreground hover:bg-secondary transition-colors text-sm"
-              >
-                Partagez une actualité, une performance, ou une opportunité...
-              </button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-xl">
-              <DialogHeader>
-                <DialogTitle>Créer une publication</DialogTitle>
-              </DialogHeader>
-              <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mt-4">
-                <TabsList className="grid grid-cols-3 w-full">
-                  <TabsTrigger value="post">Publication</TabsTrigger>
-                  <TabsTrigger value="performance">Performance</TabsTrigger>
-                  <TabsTrigger value="job">Offre</TabsTrigger>
-                </TabsList>
-                <TabsContent value="post" className="mt-4">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" />
-                      <AvatarFallback>KM</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-semibold text-foreground">Karim Mbappé</p>
-                      <p className="text-xs text-muted-foreground">Visible par tout le monde</p>
-                    </div>
-                  </div>
-                  <Textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="De quoi souhaitez-vous parler ?"
-                    className="mt-4 min-h-32 resize-none border-none bg-transparent text-lg focus-visible:ring-0 p-0"
+      <CardContent className="pt-6">
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <div className="flex items-center gap-4 cursor-pointer">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={currentUser.username} />
+                <AvatarFallback>{getUserInitials()}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 h-12 px-4 border border-border rounded-full flex items-center text-muted-foreground hover:bg-secondary transition-colors">
+                Commencer un post...
+              </div>
+            </div>
+          </DialogTrigger>
+
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Créer un post</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              {/* User Info */}
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={currentUser.username} />
+                  <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-semibold">
+                    {currentUser.firstName} {currentUser.lastName}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Public</p>
+                </div>
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Post Type Selection */}
+              <div className="flex gap-2">
+                {postTypes.map((type) => (
+                  <Button
+                    key={type.id}
+                    variant={postType === type.id ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setPostType(type.id as any)}
+                    disabled={isSubmitting}
+                  >
+                    <type.icon className={`h-4 w-4 mr-1 ${postType === type.id ? "" : type.color}`} />
+                    {type.label}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Content */}
+              <Textarea
+                placeholder="Que voulez-vous partager ?"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                disabled={isSubmitting}
+                className="min-h-[120px] resize-none"
+              />
+
+              {/* Media URL Input */}
+              {(postType === "IMAGE" || postType === "VIDEO") && (
+                <div className="space-y-2">
+                  <input
+                    type="url"
+                    placeholder={`URL de ${postType === "IMAGE" ? "l'image" : "la vidéo"}`}
+                    value={mediaUrl}
+                    onChange={(e) => setMediaUrl(e.target.value)}
+                    disabled={isSubmitting}
+                    className="w-full px-3 py-2 border border-border rounded-md"
                   />
-                  <div className="flex items-center gap-1 mt-4 pt-4 border-t border-border">
-                    {postTypes.slice(0, 4).map((type) => (
-                      <Button key={type.id} variant="ghost" size="sm" className={`gap-2 ${type.color}`}>
-                        <type.icon className="h-5 w-5" />
-                        <span className="hidden sm:inline">{type.label}</span>
-                      </Button>
-                    ))}
-                  </div>
-                  <div className="flex justify-end mt-4">
-                    <Button disabled={!content.trim()} className="px-6" onClick={handlePublishPost}>
-                      Publier
-                    </Button>
-                  </div>
-                </TabsContent>
-                <TabsContent value="performance" className="mt-4 space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Partagez vos statistiques de match, vos records personnels ou vos accomplissements sportifs.
-                  </p>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="matchName">Nom du match *</Label>
-                        <Input 
-                          id="matchName" 
-                          placeholder="Ex: PSG vs OM" 
-                          value={matchName}
-                          onChange={(e) => setMatchName(e.target.value)}
+                  {mediaUrl && (
+                    <div className="relative">
+                      {postType === "IMAGE" ? (
+                        <img
+                          src={mediaUrl}
+                          alt="Preview"
+                          className="w-full h-48 object-cover rounded-md"
+                          onError={(e) => {
+                            e.currentTarget.src = "https://via.placeholder.com/400x200?text=Image+non+disponible";
+                          }}
                         />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="matchResult">Résultat *</Label>
-                        <Input 
-                          id="matchResult" 
-                          placeholder="Ex: 3-1" 
-                          value={matchResult}
-                          onChange={(e) => setMatchResult(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="goals">Buts</Label>
-                        <Input 
-                          id="goals" 
-                          placeholder="0" 
-                          value={goals}
-                          onChange={(e) => setGoals(e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="assists">Passes D.</Label>
-                        <Input 
-                          id="assists" 
-                          placeholder="0" 
-                          value={assists}
-                          onChange={(e) => setAssists(e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="rating">Note /10</Label>
-                        <Input 
-                          id="rating" 
-                          placeholder="8.5" 
-                          value={rating}
-                          onChange={(e) => setRating(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="perfContent">Commentaire (optionnel)</Label>
-                      <Textarea 
-                        id="perfContent"
-                        placeholder="Décrivez votre performance..."
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        className="min-h-20"
-                      />
-                    </div>
-                    <div className="flex justify-end">
-                      <Button 
-                        disabled={!matchName.trim() || !matchResult.trim()} 
-                        className="px-6"
-                        onClick={handlePublishPerformance}
+                      ) : (
+                        <div className="w-full h-48 bg-secondary rounded-md flex items-center justify-center">
+                          <Video className="h-12 w-12 text-muted-foreground" />
+                        </div>
+                      )}
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="absolute top-2 right-2"
+                        onClick={() => setMediaUrl("")}
                       >
-                        Publier la performance
+                        <X className="h-4 w-4" />
                       </Button>
                     </div>
-                  </div>
-                </TabsContent>
-                <TabsContent value="job" className="mt-4 space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Publiez une offre de recrutement ou un appel d&apos;offres pour votre club ou organisation.
-                  </p>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="jobTitle">Titre du poste *</Label>
-                        <Input 
-                          id="jobTitle" 
-                          placeholder="Ex: Attaquant" 
-                          value={jobTitle}
-                          onChange={(e) => setJobTitle(e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="jobLocation">Localisation</Label>
-                        <Input 
-                          id="jobLocation" 
-                          placeholder="Ex: Paris, France" 
-                          value={jobLocation}
-                          onChange={(e) => setJobLocation(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="jobLevel">Niveau</Label>
-                        <Input 
-                          id="jobLevel" 
-                          placeholder="Ex: Ligue 1" 
-                          value={jobLevel}
-                          onChange={(e) => setJobLevel(e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="jobSalary">Salaire</Label>
-                        <Input 
-                          id="jobSalary" 
-                          placeholder="Ex: Selon profil" 
-                          value={jobSalary}
-                          onChange={(e) => setJobSalary(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="jobDescription">Description</Label>
-                      <Textarea 
-                        id="jobDescription"
-                        placeholder="Décrivez l'offre en détail..."
-                        value={jobDescription}
-                        onChange={(e) => setJobDescription(e.target.value)}
-                        className="min-h-20"
-                      />
-                    </div>
-                    <div className="flex justify-end">
-                      <Button 
-                        disabled={!jobTitle.trim()} 
-                        className="px-6"
-                        onClick={handlePublishJob}
-                      >
-                        Publier l&apos;offre
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </DialogContent>
-          </Dialog>
-        </div>
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+                  )}
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    resetForm();
+                    setIsOpen(false);
+                  }}
+                  disabled={isSubmitting}
+                >
+                  Annuler
+                </Button>
+                <Button onClick={handlePublish} disabled={isSubmitting || !content.trim()}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Publication...
+                    </>
+                  ) : (
+                    "Publier"
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Action Buttons */}
+        <div className="flex gap-2 mt-4">
           {postTypes.slice(0, 4).map((type) => (
             <Button
               key={type.id}
               variant="ghost"
               size="sm"
-              className={`flex-1 gap-2 ${type.color} hover:bg-secondary`}
-              onClick={() => setIsOpen(true)}
+              className="flex-1"
+              onClick={() => {
+                setPostType(type.id as any);
+                setIsOpen(true);
+              }}
             >
-              <type.icon className="h-5 w-5" />
-              <span className="hidden sm:inline text-foreground">{type.label}</span>
+              <type.icon className={`h-4 w-4 mr-1 ${type.color}`} />
+              <span className="hidden sm:inline">{type.label}</span>
             </Button>
           ))}
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
+import { useAuth } from "@/contexts/AuthContext"
 import {
   Home,
   Users,
@@ -18,6 +19,7 @@ import {
   User,
   Bookmark,
   FileText,
+  Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -41,8 +43,43 @@ const navItems = [
 ]
 
 export function Header() {
+  const { user, profile, isAuthenticated, logout, isLoading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchFocused, setSearchFocused] = useState(false)
+
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (!user) return "U"
+    return `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase()
+  }
+
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (!user) return "Utilisateur"
+    return `${user.firstName} ${user.lastName}`
+  }
+
+  // Get user role label
+  const getRoleLabel = () => {
+    if (!user) return ""
+    const roleLabels: Record<string, string> = {
+      PLAYER: "Joueur",
+      COACH: "Entraîneur",
+      AGENT: "Agent",
+      SCOUT: "Recruteur",
+      CLUB_ADMIN: "Admin Club",
+      FAN: "Fan",
+    }
+    return roleLabels[user.role] || user.role
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } catch (error) {
+      console.error("Logout error:", error)
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
@@ -90,70 +127,90 @@ export function Header() {
             ))}
           </nav>
 
-          {/* User Menu */}
+          {/* User Menu / Auth Buttons */}
           <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="hidden lg:flex items-center gap-1 px-2 h-auto py-1.5">
-                  <Avatar className="h-7 w-7">
-                    <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" />
-                    <AvatarFallback>KM</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col items-start text-left">
-                    <span className="text-xs font-medium text-foreground">Moi</span>
-                    <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                  </div>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-72">
-                <div className="p-3 border-b border-border">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-14 w-14">
-                      <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" />
-                      <AvatarFallback>KM</AvatarFallback>
+            {isLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            ) : isAuthenticated && user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="hidden lg:flex items-center gap-1 px-2 h-auto py-1.5">
+                    <Avatar className="h-7 w-7">
+                      <AvatarImage src={profile?.profilePicture} />
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
                     </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-foreground">Karim Mbappé</p>
-                      <p className="text-sm text-muted-foreground truncate">Milieu offensif - Ligue 1</p>
-                      <p className="text-xs text-muted-foreground">Olympique de Marseille</p>
+                    <div className="flex flex-col items-start text-left">
+                      <span className="text-xs font-medium text-foreground">Moi</span>
+                      <ChevronDown className="h-3 w-3 text-muted-foreground" />
                     </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-72">
+                  <div className="p-3 border-b border-border">
+                    <div className="flex items-start gap-3">
+                      <Avatar className="h-14 w-14">
+                        <AvatarImage src={profile?.profilePicture} />
+                        <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground">{getUserDisplayName()}</p>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {profile?.position || getRoleLabel()}
+                        </p>
+                        {profile?.currentClub && (
+                          <p className="text-xs text-muted-foreground">{profile.currentClub}</p>
+                        )}
+                      </div>
+                    </div>
+                    <Link href="/profile">
+                      <Button variant="outline" className="w-full mt-3 h-8 text-sm border-primary text-primary hover:bg-primary/5 bg-transparent">
+                        Voir le profil
+                      </Button>
+                    </Link>
                   </div>
-                  <Link href="/profile">
-                    <Button variant="outline" className="w-full mt-3 h-8 text-sm border-primary text-primary hover:bg-primary/5 bg-transparent">
-                      Voir le profil
-                    </Button>
-                  </Link>
-                </div>
-                <div className="p-1">
-                  <p className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Compte</p>
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings" className="flex items-center gap-2">
-                      <Settings className="h-4 w-4" />
-                      Paramètres et confidentialité
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/saved" className="flex items-center gap-2">
-                      <Bookmark className="h-4 w-4" />
-                      Éléments enregistrés
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/applications" className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      Mes candidatures
-                    </Link>
-                  </DropdownMenuItem>
-                </div>
-                <DropdownMenuSeparator />
-                <div className="p-1">
-                  <DropdownMenuItem className="text-destructive focus:text-destructive">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Déconnexion
-                  </DropdownMenuItem>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <div className="p-1">
+                    <p className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Compte</p>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings" className="flex items-center gap-2">
+                        <Settings className="h-4 w-4" />
+                        Paramètres et confidentialité
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/saved" className="flex items-center gap-2">
+                        <Bookmark className="h-4 w-4" />
+                        Éléments enregistrés
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/applications" className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Mes candidatures
+                      </Link>
+                    </DropdownMenuItem>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <div className="p-1">
+                    <DropdownMenuItem 
+                      className="text-destructive focus:text-destructive cursor-pointer"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Déconnexion
+                    </DropdownMenuItem>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="hidden lg:flex items-center gap-2">
+                <Button variant="ghost" asChild>
+                  <Link href="/login">Se connecter</Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/register">S'inscrire</Link>
+                </Button>
+              </div>
+            )}
 
             {/* Mobile Menu Button */}
             <Button
@@ -171,20 +228,48 @@ export function Header() {
         {mobileMenuOpen && (
           <nav className="lg:hidden py-2 border-t border-border">
             <div className="grid grid-cols-3 gap-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex flex-col items-center p-3 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <div className="relative">
-                    <item.icon className="h-5 w-5" />
-                    {item.notifications && (
-                      <Badge className="absolute -top-1 -right-1 h-4 min-w-4 p-0 flex items-center justify-center text-[10px] bg-destructive text-destructive-foreground">
-                        {item.notifications}
-                      </Badge>
-                    )}
+              {isAuthenticated && user ? (
+                <>
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={profile?.profilePicture} />
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-foreground">{getUserDisplayName()}</p>
+                      <p className="text-sm text-muted-foreground">Voir le profil</p>
+                    </div>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 mt-1"
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      handleLogout()
+                    }}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Déconnexion
+                  </Button>
+                </>
+              ) : (
+                <div className="flex flex-col gap-2 p-3">
+                  <Button asChild>
+                    <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                      Se connecter
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+                      S'inscrire
+                    </Link>
+                  </Button>
+                </div>
+              )}}
                   </div>
                   <span className="text-xs mt-1">{item.label}</span>
                 </Link>

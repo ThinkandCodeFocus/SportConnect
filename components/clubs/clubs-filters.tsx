@@ -1,19 +1,54 @@
-"use client"
+"use client";
 
-import { Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Club } from "@/lib/types/api";
 
-export function ClubsFilters() {
+interface ClubsFiltersProps {
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  selectedType: string;
+  onTypeChange: (type: string) => void;
+  selectedSport: string;
+  onSportChange: (sport: string) => void;
+  selectedCountry: string;
+  onCountryChange: (country: string) => void;
+  clubs: Club[];
+}
+
+export function ClubsFilters({
+  searchQuery,
+  onSearchChange,
+  selectedType,
+  onTypeChange,
+  selectedSport,
+  onSportChange,
+  selectedCountry,
+  onCountryChange,
+  clubs,
+}: ClubsFiltersProps) {
+  // Extract unique sports and countries from clubs
+  const uniqueSports = Array.from(new Set(clubs.map(club => club.sport)));
+  const uniqueCountries = Array.from(new Set(clubs.map(club => club.country).filter(Boolean)));
+
+  const getSportLabel = (sport: string) => {
+    const labels: Record<string, string> = {
+      FOOTBALL: "Football",
+      BASKETBALL: "Basketball",
+      VOLLEYBALL: "Volleyball",
+      HANDBALL: "Handball",
+      ATHLETICS: "Athlétisme",
+      SWIMMING: "Natation",
+      TENNIS: "Tennis",
+      MARTIAL_ARTS: "Arts Martiaux",
+      OTHER: "Autre",
+    };
+    return labels[sport] || sport;
+  };
+
   return (
     <Card className="mb-6">
       <CardContent className="p-4">
@@ -24,58 +59,52 @@ export function ClubsFilters() {
               type="search"
               placeholder="Rechercher un club, une académie, une fédération..."
               className="pl-9"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
             />
           </div>
           <div className="flex flex-wrap gap-2">
-            <Select defaultValue="all">
+            <Select value={selectedSport} onValueChange={onSportChange}>
               <SelectTrigger className="w-36">
                 <SelectValue placeholder="Sport" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les sports</SelectItem>
-                <SelectItem value="football">Football</SelectItem>
-                <SelectItem value="basketball">Basketball</SelectItem>
-                <SelectItem value="handball">Handball</SelectItem>
-                <SelectItem value="rugby">Rugby</SelectItem>
-                <SelectItem value="athletics">Athlétisme</SelectItem>
+                {uniqueSports.map(sport => (
+                  <SelectItem key={sport} value={sport}>
+                    {getSportLabel(sport)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-            <Select defaultValue="all">
+            
+            <Select value={selectedCountry} onValueChange={onCountryChange}>
               <SelectTrigger className="w-36">
                 <SelectValue placeholder="Pays" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les pays</SelectItem>
-                <SelectItem value="france">France</SelectItem>
-                <SelectItem value="spain">Espagne</SelectItem>
-                <SelectItem value="germany">Allemagne</SelectItem>
-                <SelectItem value="italy">Italie</SelectItem>
-                <SelectItem value="england">Angleterre</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select defaultValue="all">
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Niveau" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous les niveaux</SelectItem>
-                <SelectItem value="pro">Professionnel</SelectItem>
-                <SelectItem value="semi-pro">Semi-professionnel</SelectItem>
-                <SelectItem value="amateur">Amateur</SelectItem>
+                {uniqueCountries.map(country => (
+                  <SelectItem key={country} value={country!}>
+                    {country}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </div>
-        <Tabs defaultValue="all" className="mt-4">
+        
+        <Tabs value={selectedType} onValueChange={onTypeChange} className="mt-4">
           <TabsList className="bg-secondary/50">
             <TabsTrigger value="all">Tout</TabsTrigger>
-            <TabsTrigger value="clubs">Clubs</TabsTrigger>
-            <TabsTrigger value="academies">Académies</TabsTrigger>
-            <TabsTrigger value="federations">Fédérations</TabsTrigger>
-            <TabsTrigger value="sponsors">Sponsors</TabsTrigger>
+            <TabsTrigger value="PROFESSIONAL_CLUB">Clubs Pro</TabsTrigger>
+            <TabsTrigger value="AMATEUR_CLUB">Clubs Amateur</TabsTrigger>
+            <TabsTrigger value="ACADEMY">Académies</TabsTrigger>
+            <TabsTrigger value="FEDERATION">Fédérations</TabsTrigger>
+            <TabsTrigger value="NATIONAL_TEAM">Équipes Nationales</TabsTrigger>
           </TabsList>
         </Tabs>
       </CardContent>
     </Card>
-  )
+  );
 }
