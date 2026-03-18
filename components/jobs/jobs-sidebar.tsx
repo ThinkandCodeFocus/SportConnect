@@ -63,22 +63,22 @@ const savedJobs = [
 const topRecruiters = [
   {
     id: 1,
-    name: "Paris Saint-Germain",
-    logo: "PSG",
+    name: "AS Jeanne d'Arc",
+    logo: "JA",
     openPositions: 12,
     followers: "2.3M",
   },
   {
     id: 2,
-    name: "Olympique de Marseille",
-    logo: "OM",
+    name: "AS Dakar Sacré-Cœur",
+    logo: "ASDC",
     openPositions: 8,
     followers: "1.8M",
   },
   {
     id: 3,
-    name: "AS Monaco",
-    logo: "ASM",
+    name: "Génération Foot",
+    logo: "GF",
     openPositions: 6,
     followers: "980K",
   },

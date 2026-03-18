@@ -1,6 +1,9 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useAuth } from "@/contexts/AuthContext"
+import api from "@/lib/api/endpoints"
 import {
   User,
   TrendingUp,
@@ -9,6 +12,7 @@ import {
   BarChart3,
   Bookmark,
   Users,
+  Loader2,
 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
@@ -16,53 +20,94 @@ import { Badge } from "@/components/ui/badge"
 
 const quickLinks = [
   { href: "/profile", icon: User, label: "Mon profil" },
-  { href: "/performances", icon: TrendingUp, label: "Mes performances" },
-  { href: "/applications", icon: FileText, label: "Mes candidatures" },
-  { href: "/clubs/following", icon: Building2, label: "Clubs suivis" },
-  { href: "/stats", icon: BarChart3, label: "Mes statistiques" },
+  { href: "/jobs", icon: FileText, label: "Offres d'emploi" },
+  { href: "/clubs", icon: Building2, label: "Clubs" },
+  { href: "/network", icon: Users, label: "Réseau" },
   { href: "/saved", icon: Bookmark, label: "Enregistrés" },
 ]
 
 export function LeftSidebar() {
+  const { user, profile, isAuthenticated, isLoading: authLoading } = useAuth()
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Get user initials
+  const getUserInitials = () => {
+    if (!user) return "U"
+    return `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase()
+  }
+
+  if (authLoading) {
+    return (
+      <aside className="w-full lg:w-56 xl:w-64 shrink-0">
+        <Card>
+          <CardContent className="py-12 flex justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </CardContent>
+        </Card>
+      </aside>
+    )
+  }
+
+  if (!isAuthenticated || !user) {
+    return (
+      <aside className="w-full lg:w-56 xl:w-64 shrink-0">
+        <Card>
+          <CardContent className="py-8 text-center">
+            <h3 className="font-semibold text-foreground">Non connecté</h3>
+            <p className="text-sm text-muted-foreground mt-2">Connectez-vous pour voir votre profil</p>
+            <Link href="/login" className="inline-block mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90 text-sm font-medium">
+              Se connecter
+            </Link>
+          </CardContent>
+        </Card>
+      </aside>
+    )
+  }
+
   return (
     <aside className="w-full lg:w-56 xl:w-64 shrink-0 space-y-4">
       {/* Profile Card */}
       <Card className="overflow-hidden">
-        <div className="h-16 bg-gradient-to-r from-primary/80 to-primary relative">
+        <div className="h-16 bg-gradient-to-r from-green-600 to-green-700 relative">
           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
             <Avatar className="h-16 w-16 border-4 border-card">
-              <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" />
-              <AvatarFallback className="text-lg">KM</AvatarFallback>
+              <AvatarImage src={profile?.profilePicture} />
+              <AvatarFallback className="text-lg">{getUserInitials()}</AvatarFallback>
             </Avatar>
           </div>
         </div>
         <CardContent className="pt-10 pb-4 text-center">
           <Link href="/profile" className="hover:underline">
-            <h3 className="font-semibold text-foreground">Karim Mbappé</h3>
+            <h3 className="font-semibold text-foreground text-lg">
+              {user.firstName} {user.lastName}
+            </h3>
           </Link>
-          <p className="text-sm text-muted-foreground mt-0.5">Milieu offensif</p>
-          <div className="flex items-center justify-center gap-2 mt-2">
-            <Badge variant="secondary" className="text-xs font-normal">
-              Semi-Pro
-            </Badge>
-            <Badge className="text-xs font-normal bg-primary/10 text-primary hover:bg-primary/20">
-              Football
-            </Badge>
-          </div>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {profile?.position || user.role || "Utilisateur"}
+          </p>
+          {profile?.currentClub && (
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <Badge variant="secondary" className="text-xs font-normal">
+                {profile.level || "Joueur"}
+              </Badge>
+              <Badge className="text-xs font-normal bg-green-500/10 text-green-700 hover:bg-green-500/20">
+                Football
+              </Badge>
+            </div>
+          )}
           <div className="mt-3 pt-3 border-t border-border">
-            <Link href="/profile" className="flex items-center justify-between text-sm hover:bg-secondary px-2 py-1.5 rounded-md transition-colors">
-              <span className="text-muted-foreground">Club actuel</span>
-              <span className="font-medium text-foreground">OM</span>
-            </Link>
+            {profile?.currentClub && (
+              <Link href="/profile" className="flex items-center justify-between text-sm hover:bg-secondary px-2 py-1.5 rounded-md transition-colors">
+                <span className="text-muted-foreground">Club actuel</span>
+                <span className="font-medium text-foreground truncate">{profile.currentClub}</span>
+              </Link>
+            )}
           </div>
-          <div className="mt-1 border-t border-border pt-3">
+          {/* Stats */}
+          <div className="mt-1 border-t border-border pt-3 space-y-1">
             <Link href="/network" className="flex items-center justify-between text-sm hover:bg-secondary px-2 py-1.5 rounded-md transition-colors">
               <span className="text-muted-foreground">Connexions</span>
-              <span className="font-medium text-primary">847</span>
-            </Link>
-            <Link href="/profile/views" className="flex items-center justify-between text-sm hover:bg-secondary px-2 py-1.5 rounded-md transition-colors">
-              <span className="text-muted-foreground">Vues du profil</span>
-              <span className="font-medium text-primary">234</span>
+              <span className="font-medium text-primary">--</span>
             </Link>
           </div>
         </CardContent>

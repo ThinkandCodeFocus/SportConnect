@@ -68,10 +68,18 @@ apiClient.interceptors.response.use(
       ? (Object.values(normalizedErrors)[0] as string | undefined)
       : undefined;
 
-    const normalizedMessage = (hasMessage ? (data?.message as string) : undefined)
+    // Handle timeout and network errors with user-friendly messages
+    let normalizedMessage = (hasMessage ? (data?.message as string) : undefined)
       || firstValidationError
       || error.message
       || "An error occurred";
+
+    // Convert technical timeout messages to user-friendly ones
+    if (normalizedMessage.includes("timeout") || normalizedMessage.includes("ECONNABORTED")) {
+      normalizedMessage = "Problème de Connexion - Le serveur met trop de temps à répondre";
+    } else if (normalizedMessage.includes("Network") || normalizedMessage.includes("ECONNREFUSED")) {
+      normalizedMessage = "Problème de Connexion - Vérifiez votre connexion internet";
+    }
 
     // Handle 401 Unauthorized
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthRequest) {

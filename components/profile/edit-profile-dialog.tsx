@@ -126,7 +126,7 @@ export function EditProfileDialog({ user, profile, open, onOpenChange }: EditPro
               <Input
                 id="currentClub"
                 name="currentClub"
-                placeholder="Ex: Olympique de Marseille"
+                placeholder="Ex: AS Jeanne d'Arc"
                 value={formData.currentClub}
                 onChange={handleChange}
                 disabled={isSubmitting}

@@ -86,19 +86,19 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-14">
           {/* Logo and Search */}
-          <div className="flex items-center gap-2 lg:gap-4 flex-1 max-w-md">
-            <Link href="/" className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 flex-1 max-w-md">
+            <Link href="/" className="flex items-center gap-1 sm:gap-2 shrink-0">
               <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">SC</span>
+                <span className="text-primary-foreground font-bold text-sm sm:text-lg">SC</span>
               </div>
-              <span className="hidden xl:block font-semibold text-foreground">SportConnect</span>
+              <span className="hidden xl:block font-semibold text-foreground text-sm sm:text-base">SportConnect</span>
             </Link>
             <div className={`relative flex-1 transition-all ${searchFocused ? "lg:flex-none lg:w-80" : ""}`}>
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Rechercher..."
-                className="pl-9 bg-secondary border-none h-9 text-sm"
+                className="pl-9 bg-secondary border-none h-8 sm:h-9 text-xs sm:text-sm"
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
               />
@@ -227,26 +227,49 @@ export function Header() {
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <nav className="lg:hidden py-2 border-t border-border">
-            <div className="grid grid-cols-3 gap-1">
+            <div className="flex flex-col gap-1">
+              {/* Nav Items */}
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors rounded-lg relative"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span className="flex-1">{item.label}</span>
+                  {item.notifications && (
+                    <Badge className="h-5 min-w-5 px-1.5 flex items-center justify-center text-[10px] bg-destructive text-destructive-foreground">
+                      {item.notifications > 9 ? "9+" : item.notifications}
+                    </Badge>
+                  )}
+                </Link>
+              ))}
+              
+              <div className="border-t border-border my-2" />
+              
+              {/* User Menu Items */}
               {isAuthenticated && user ? (
                 <>
                   <Link
                     href="/profile"
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary transition-colors"
+                    className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors rounded-lg"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={profile?.profilePicture} />
-                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium text-foreground">{getUserDisplayName()}</p>
-                      <p className="text-sm text-muted-foreground">Voir le profil</p>
-                    </div>
+                    <User className="h-5 w-5" />
+                    <span>Mon profil</span>
+                  </Link>
+                  <Link
+                    href="/saved"
+                    className="flex items-center gap-3 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors rounded-lg"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Bookmark className="h-5 w-5" />
+                    <span>Enregistrés</span>
                   </Link>
                   <Button
                     variant="ghost"
-                    className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 mt-1"
+                    className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
                     onClick={() => {
                       setMobileMenuOpen(false)
                       handleLogout()
@@ -257,13 +280,13 @@ export function Header() {
                   </Button>
                 </>
               ) : (
-                <div className="flex flex-col gap-2 p-3">
-                  <Button asChild>
+                <div className="flex flex-col gap-2 px-4 py-2">
+                  <Button asChild className="w-full">
                     <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
                       Se connecter
                     </Link>
                   </Button>
-                  <Button variant="outline" asChild>
+                  <Button variant="outline" asChild className="w-full">
                     <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
                       S'inscrire
                     </Link>

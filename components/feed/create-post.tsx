@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { User, CreatePostRequest } from "@/lib/types/api";
 import api from "@/lib/api/endpoints";
 import {
@@ -43,6 +43,7 @@ export function CreatePost({ onPostCreated, currentUser }: CreatePostProps) {
   const [mediaUrl, setMediaUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getUserInitials = () => {
     return `${currentUser.firstName?.[0] || ""}${currentUser.lastName?.[0] || ""}`.toUpperCase();
@@ -53,6 +54,39 @@ export function CreatePost({ onPostCreated, currentUser }: CreatePostProps) {
     setPostType("TEXT");
     setMediaUrl("");
     setError("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Handle file upload and convert to base64
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Vérifier la taille (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Le fichier est trop volumineux (max 5MB)");
+      return;
+    }
+
+    // Vérifier le type de fichier
+    if (!file.type.startsWith("image/")) {
+      setError("Veuillez sélectionner une image valide");
+      return;
+    }
+
+    // Convertir en base64
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64String = event.target?.result as string;
+      setMediaUrl(base64String);
+      setError("");
+    };
+    reader.onerror = () => {
+      setError("Erreur lors de la lecture du fichier");
+    };
+    reader.readAsDataURL(file);
   };
 
   const handlePublish = async () => {
@@ -61,8 +95,13 @@ export function CreatePost({ onPostCreated, currentUser }: CreatePostProps) {
       return;
     }
 
-    if ((postType === "IMAGE" || postType === "VIDEO") && !mediaUrl.trim()) {
-      setError("Veuillez fournir une URL pour le média");
+    if (postType === "IMAGE" && !mediaUrl.trim()) {
+      setError("Veuillez sélectionner une photo");
+      return;
+    }
+
+    if (postType === "VIDEO" && !mediaUrl.trim()) {
+      setError("Veuillez fournir une URL pour la vidéo");
       return;
     }
 
@@ -104,12 +143,12 @@ export function CreatePost({ onPostCreated, currentUser }: CreatePostProps) {
             </div>
           </DialogTrigger>
 
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Créer un post</DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {/* User Info */}
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
@@ -133,7 +172,7 @@ export function CreatePost({ onPostCreated, currentUser }: CreatePostProps) {
               )}
 
               {/* Post Type Selection */}
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-1 sm:gap-2">
                 {postTypes.map((type) => (
                   <Button
                     key={type.id}
@@ -141,9 +180,11 @@ export function CreatePost({ onPostCreated, currentUser }: CreatePostProps) {
                     size="sm"
                     onClick={() => setPostType(type.id as any)}
                     disabled={isSubmitting}
+                    className="text-xs sm:text-sm"
                   >
-                    <type.icon className={`h-4 w-4 mr-1 ${postType === type.id ? "" : type.color}`} />
-                    {type.label}
+                    <type.icon className={`h-4 w-4 ${postType === type.id ? "mr-1" : "mr-0.5 sm:mr-1"} ${postType === type.id ? "" : type.color}`} />
+                    <span className="hidden sm:inline">{type.label}</span>
+                    <span className="sm:hidden">{type.label.substring(0, 2)}</span>
                   </Button>
                 ))}
               </div>
@@ -157,12 +198,69 @@ export function CreatePost({ onPostCreated, currentUser }: CreatePostProps) {
                 className="min-h-[120px] resize-none"
               />
 
-              {/* Media URL Input */}
-              {(postType === "IMAGE" || postType === "VIDEO") && (
+              {/* Media Upload/URL Input */}
+              {postType === "IMAGE" && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium">
+                    Sélectionner une photo
+                  </label>
+                  <div 
+                    className="border-2 border-dashed border-border rounded-lg p-4 cursor-pointer hover:bg-secondary transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      disabled={isSubmitting}
+                      className="hidden"
+                    />
+                    <div className="text-center">
+                      {!mediaUrl ? (
+                        <>
+                          <ImageIcon className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                          <p className="text-sm text-muted-foreground">
+                            Cliquez pour sélectionner une photo
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          Photo sélectionnée
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {mediaUrl && (
+                    <div className="relative">
+                      <img
+                        src={mediaUrl}
+                        alt="Preview"
+                        className="w-full h-48 object-cover rounded-md"
+                      />
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="absolute top-2 right-2"
+                        onClick={() => {
+                          setMediaUrl("");
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = "";
+                          }
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {postType === "VIDEO" && (
                 <div className="space-y-2">
                   <input
                     type="url"
-                    placeholder={`URL de ${postType === "IMAGE" ? "l'image" : "la vidéo"}`}
+                    placeholder="URL de la vidéo (YouTube, Vimeo, etc.)"
                     value={mediaUrl}
                     onChange={(e) => setMediaUrl(e.target.value)}
                     disabled={isSubmitting}
@@ -170,20 +268,9 @@ export function CreatePost({ onPostCreated, currentUser }: CreatePostProps) {
                   />
                   {mediaUrl && (
                     <div className="relative">
-                      {postType === "IMAGE" ? (
-                        <img
-                          src={mediaUrl}
-                          alt="Preview"
-                          className="w-full h-48 object-cover rounded-md"
-                          onError={(e) => {
-                            e.currentTarget.src = "https://via.placeholder.com/400x200?text=Image+non+disponible";
-                          }}
-                        />
-                      ) : (
-                        <div className="w-full h-48 bg-secondary rounded-md flex items-center justify-center">
-                          <Video className="h-12 w-12 text-muted-foreground" />
-                        </div>
-                      )}
+                      <div className="w-full h-48 bg-secondary rounded-md flex items-center justify-center">
+                        <Video className="h-12 w-12 text-muted-foreground" />
+                      </div>
                       <Button
                         variant="secondary"
                         size="icon"
@@ -198,7 +285,7 @@ export function CreatePost({ onPostCreated, currentUser }: CreatePostProps) {
               )}
 
               {/* Actions */}
-              <div className="flex justify-end gap-2">
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -206,10 +293,11 @@ export function CreatePost({ onPostCreated, currentUser }: CreatePostProps) {
                     setIsOpen(false);
                   }}
                   disabled={isSubmitting}
+                  className="w-full sm:w-auto"
                 >
                   Annuler
                 </Button>
-                <Button onClick={handlePublish} disabled={isSubmitting || !content.trim()}>
+                <Button onClick={handlePublish} disabled={isSubmitting || !content.trim()} className="w-full sm:w-auto">
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

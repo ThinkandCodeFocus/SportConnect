@@ -100,13 +100,12 @@ export function ClubContent() {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground leading-relaxed">
-            L&apos;Olympique de Marseille est un club de football français fondé en 1899, basé à Marseille. 
-            C&apos;est l&apos;un des clubs les plus titrés et populaires de France, et le seul club français 
-            à avoir remporté la Ligue des Champions (1993).
+            L&apos;AS Dakar Sacré-Cœur est un club de football sénégalais fondé au début du 20e siècle, basé à Dakar. 
+            C&apos;est l&apos;un des clubs les plus titrés et respectés du Sénégal, avec une riche histoire de victoires nationales.
           </p>
           <p className="text-muted-foreground leading-relaxed mt-3">
-            Le club évolue en Ligue 1 et joue ses matchs à domicile au Stade Vélodrome, 
-            l&apos;une des plus belles enceintes de France avec une capacité de 67 394 places.
+            Le club évolue en Division 1 et joue ses matchs à domicile au Stade Iba Mar Diop, 
+            l&apos;une des plus belles enceintes du Sénégal avec une capacité de 15 000 places.
           </p>
         </CardContent>
       </Card>

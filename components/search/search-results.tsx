@@ -99,9 +99,9 @@ const clubResults = [
   },
   {
     id: 2,
-    name: "Olympique de Marseille",
+    name: "AS Dakar Sacré-Cœur",
     type: "Club Professionnel",
-    location: "Marseille, France",
+    location: "Dakar, Sénégal",
     logo: "/placeholder.svg?height=80&width=80",
     sport: "Football",
     followers: "4.2M",

@@ -78,13 +78,13 @@ export function ClubSidebar() {
           <div className="flex items-start gap-3">
             <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
             <div>
-              <p className="text-foreground">Stade Vélodrome</p>
-              <p className="text-muted-foreground">3 Boulevard Michelet, 13008 Marseille</p>
+              <p className="text-foreground">Stade Iba Mar Diop</p>
+              <p className="text-muted-foreground">Avenue du Général de Gaulle, Dakar</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Calendar className="h-4 w-4 text-muted-foreground" />
-            <p className="text-muted-foreground">Fondé en <span className="text-foreground">1899</span></p>
+            <p className="text-muted-foreground">Fondé en <span className="text-foreground">1906</span></p>
           </div>
           <div className="flex items-center gap-3">
             <Users className="h-4 w-4 text-muted-foreground" />
