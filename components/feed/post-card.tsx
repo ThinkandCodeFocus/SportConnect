@@ -152,8 +152,8 @@ export function PostCard({ post, currentUser, onLike, onUnlike, onDelete }: Post
         <div className="flex items-center gap-4 my-3 text-sm text-muted-foreground">
           {post.likesCount > 0 && (
             <span>{post.likesCount} {post.likesCount === 1 ? "j'aime" : "j'aimes"}</span>
-          )commentsCount > 0 && (
-            <span>{commentsCount} {
+          )}
+          {post.commentsCount > 0 && (
             <span>{post.commentsCount} {post.commentsCount === 1 ? "commentaire" : "commentaires"}</span>
           )}
           {post.sharesCount > 0 && (

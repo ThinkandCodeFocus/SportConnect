@@ -269,27 +269,7 @@ export function Header() {
                     </Link>
                   </Button>
                 </div>
-              )}}
-                  </div>
-                  <span className="text-xs mt-1">{item.label}</span>
-                </Link>
-              ))}
-            </div>
-            <div className="mt-2 pt-2 border-t border-border">
-              <Link
-                href="/profile"
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" />
-                  <AvatarFallback>KM</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium text-foreground">Karim Mbappé</p>
-                  <p className="text-sm text-muted-foreground">Voir le profil</p>
-                </div>
-              </Link>
+              )}
             </div>
           </nav>
         )}

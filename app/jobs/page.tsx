@@ -66,7 +66,7 @@ export default function JobsPage() {
     }
 
     // Sport filter (using club's sport)
-    if (selectedSport !== "all" && job => job.club) {
+    if (selectedSport !== "all") {
       filtered = filtered.filter(job => job.club?.sport === selectedSport);
     }
 
