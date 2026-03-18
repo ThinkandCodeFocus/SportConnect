@@ -52,9 +52,29 @@ apiClient.interceptors.response.use(
   },
   async (error: AxiosError<ErrorResponse>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const requestUrl = originalRequest?.url || "";
+    const isAuthRequest = requestUrl.includes("/api/auth/login") || requestUrl.includes("/api/auth/register");
+
+    const data = error.response?.data as unknown as Record<string, unknown> | undefined;
+    const hasMessage = !!data && typeof data.message === "string";
+    const hasNestedErrors = !!data && typeof data.errors === "object" && data.errors !== null;
+    const isFlatValidationMap = !!data && !hasMessage && !hasNestedErrors;
+
+    const normalizedErrors = (hasNestedErrors
+      ? (data?.errors as Record<string, string>)
+      : (isFlatValidationMap ? (data as Record<string, string>) : undefined));
+
+    const firstValidationError = normalizedErrors
+      ? (Object.values(normalizedErrors)[0] as string | undefined)
+      : undefined;
+
+    const normalizedMessage = (hasMessage ? (data?.message as string) : undefined)
+      || firstValidationError
+      || error.message
+      || "An error occurred";
 
     // Handle 401 Unauthorized
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRequest) {
       originalRequest._retry = true;
 
       // TODO: Implement token refresh logic here
@@ -69,11 +89,10 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Handle other errors
     const apiError: ApiError = {
-      message: error.response?.data?.message || error.message || "An error occurred",
+      message: normalizedMessage,
       status: error.response?.status || 500,
-      errors: error.response?.data?.errors,
+      errors: normalizedErrors,
     };
 
     return Promise.reject(apiError);

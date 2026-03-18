@@ -63,7 +63,7 @@ export default function RegisterPage() {
         hasUpperCase: /[A-Z]/.test(value),
         hasLowerCase: /[a-z]/.test(value),
         hasNumber: /[0-9]/.test(value),
-        hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(value),
+        hasSpecial: /[@#$%^&+=!]/.test(value),
       });
     }
 
@@ -94,6 +94,16 @@ export default function RegisterPage() {
       return false;
     }
 
+    if (!passwordStrength.hasSpecial) {
+      setError("Le mot de passe doit contenir un caractere special parmi @ # $ % ^ & + = !");
+      return false;
+    }
+
+    if (formData.phone && !/^\+?[0-9]{10,15}$/.test(formData.phone)) {
+      setError("Le numero de telephone doit etre au format +221771234567 (10 a 15 chiffres)");
+      return false;
+    }
+
     return true;
   };
 
@@ -119,7 +129,12 @@ export default function RegisterPage() {
       });
       // Redirection automatique vers "/" par le context
     } catch (err: any) {
-      setError(err.message || "Échec de l'inscription. Veuillez réessayer.");
+      if (err?.errors && typeof err.errors === "object") {
+        const firstError = Object.values(err.errors)[0] as string | undefined;
+        setError(firstError || err.message || "Echec de l'inscription. Veuillez reessayer.");
+      } else {
+        setError(err.message || "Echec de l'inscription. Veuillez reessayer.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -285,7 +300,7 @@ export default function RegisterPage() {
                   />
                   <PasswordRequirement
                     met={passwordStrength.hasSpecial}
-                    text="Un caractère spécial (recommandé)"
+                    text="Un caractere special (@ # $ % ^ & + = !)"
                   />
                 </div>
               )}
