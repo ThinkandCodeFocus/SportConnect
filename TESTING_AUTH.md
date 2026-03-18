@@ -26,14 +26,14 @@
 
 ## 🚀 Comment Tester
 
-### **Étape 1 : Démarrer le Backend**
+### **Étape 1 : Backend Déployé**
 
 ```bash
-cd galsenfoot-backend
-./mvnw spring-boot:run
+# Backend déployé sur Render
+# URL: https://galsenfoot-backend.onrender.com
 ```
 
-✅ Le backend doit tourner sur `http://localhost:8080`
+✅ Le backend doit être accessible sur `https://galsenfoot-backend.onrender.com`
 
 ### **Étape 2 : Démarrer le Frontend**
 
@@ -117,7 +117,7 @@ Sur la page `/login`, un bouton **"Remplir avec compte test"** apparaît en mode
 4. Soumettre
 
 # Option 2 : Via cURL (backend direct)
-curl -X POST http://localhost:8080/api/auth/register \
+curl -X POST https://galsenfoot-backend.onrender.com/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -160,7 +160,7 @@ console.log("Loading:", isLoading);
 
 ```javascript
 // Dans la console du navigateur
-fetch('http://localhost:8080/api/auth/login', {
+fetch('https://galsenfoot-backend.onrender.com/api/auth/login', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -189,7 +189,7 @@ DevTools → Network → Filtrer par "XHR" :
 **Cause** : Le backend n'est pas démarré ou CORS mal configuré
 
 **Solution** :
-1. Vérifier que le backend tourne sur `http://localhost:8080`
+1. Vérifier que le backend est accessible sur `https://galsenfoot-backend.onrender.com`
 2. Le backend est déjà configuré pour accepter `localhost:3000`
 
 ### **Erreur : "Invalid credentials"**

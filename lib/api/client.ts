@@ -3,7 +3,7 @@ import { getAccessToken, saveAccessToken, clearTokens } from "@/lib/utils/auth";
 import { ApiError } from "@/lib/types/api";
 
 // API Base URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://galsenfoot-backend.onrender.com";
 const API_TIMEOUT = parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || "30000");
 
 // Error response type from backend

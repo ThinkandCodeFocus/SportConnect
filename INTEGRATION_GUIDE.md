@@ -53,11 +53,11 @@
 
 ### **1. Configuration Backend**
 
-Assurez-vous que le backend Spring Boot tourne sur `http://localhost:8080`
+Assurez-vous que le backend Spring Boot est accessible sur `https://galsenfoot-backend.onrender.com`
 
 ```bash
-cd galsenfoot-backend
-./mvnw spring-boot:run
+# Backend deja deploie sur Render
+# URL: https://galsenfoot-backend.onrender.com
 ```
 
 ### **2. Configuration Frontend**
@@ -65,7 +65,7 @@ cd galsenfoot-backend
 Créer le fichier `.env.local` à la racine de SportConnect :
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8080
+NEXT_PUBLIC_API_URL=https://galsenfoot-backend.onrender.com
 NEXT_PUBLIC_API_TIMEOUT=30000
 NEXT_PUBLIC_TOKEN_KEY=galsenfoot_access_token
 NEXT_PUBLIC_REFRESH_TOKEN_KEY=galsenfoot_refresh_token
