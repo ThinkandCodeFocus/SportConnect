@@ -1,9 +1,12 @@
 "use client"
 
 import { Header } from "@/components/layout/header"
+import { useProtectedRoute } from "@/lib/hooks/useProtectedRoute"
 import { MyClubDashboard } from "@/components/my-club/my-club-dashboard"
 
 export default function MyClubPage() {
+  useProtectedRoute(); // Redirect to login if not authenticated
+  
   return (
     <div className="min-h-screen bg-background">
       <Header />

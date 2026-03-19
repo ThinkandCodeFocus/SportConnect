@@ -76,7 +76,7 @@ export default function HomePage() {
                 Rejoignez notre communauté
               </h2>
               <p className="text-muted-foreground text-lg">
-                SportConnect connecte les talents et les opportunités au Sénégal
+                GalsenFoot connecte les talents et les opportunités au Sénégal
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
@@ -141,7 +141,7 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 text-center">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">Prêt à progresser ?</h2>
             <p className="text-lg text-green-100 mb-8 max-w-2xl mx-auto">
-              Rejoignez des milliers de joueurs et professionnels du football qui utilisent SportConnect pour avancer dans leur carrière.
+              Rejoignez des milliers de joueurs et professionnels du football qui utilisent GalsenFoot pour avancer dans leur carrière.
             </p>
             <Link href="/register">
               <Button size="lg" className="bg-white text-green-600 hover:bg-green-50 font-semibold">
@@ -154,7 +154,7 @@ export default function HomePage() {
         {/* Footer */}
         <footer className="border-t border-border py-8">
           <div className="max-w-7xl mx-auto px-4 text-center text-muted-foreground text-sm">
-            <p>© 2026 SportConnect. Tous les droits réservés.</p>
+            <p>© 2026 GalsenFoot. Tous les droits réservés.</p>
           </div>
         </footer>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useProtectedRoute } from "@/lib/hooks/useProtectedRoute";
 import api from "@/lib/api/endpoints";
 import { Club } from "@/lib/types/api";
 import Link from "next/link";
@@ -12,7 +12,7 @@ import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function ClubsPage() {
-  const { isAuthenticated } = useAuth();
+  const { isCheckingAuth, canAccess } = useProtectedRoute();
   const [clubs, setClubs] = useState<Club[]>([]);
   const [filteredClubs, setFilteredClubs] = useState<Club[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,8 +25,9 @@ export default function ClubsPage() {
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
 
   useEffect(() => {
+    if (!canAccess) return;
     loadClubs();
-  }, []);
+  }, [canAccess]);
 
   useEffect(() => {
     applyFilters();
@@ -76,6 +77,14 @@ export default function ClubsPage() {
 
     setFilteredClubs(filtered);
   };
+
+  if (isCheckingAuth || !canAccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

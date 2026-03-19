@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 import { UserRole } from "@/lib/types/api";
 
 const USER_ROLES: { value: UserRole; label: string; description: string }[] = [
@@ -22,6 +23,7 @@ const USER_ROLES: { value: UserRole; label: string; description: string }[] = [
 ];
 
 export default function RegisterPage() {
+  const router = useRouter();
   const { register, isLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
@@ -150,7 +152,16 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4 py-8">
-      <Card className="w-full max-w-2xl">
+      <div className="w-full max-w-2xl">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.back()}
+          className="mb-4"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <Card>
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 bg-primary rounded-xl flex items-center justify-center">
@@ -323,7 +334,7 @@ export default function RegisterPage() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -359,6 +370,7 @@ export default function RegisterPage() {
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

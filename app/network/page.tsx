@@ -1,10 +1,13 @@
 "use client";
 
 import { Header } from "@/components/layout/header";
+import { useProtectedRoute } from "@/lib/hooks/useProtectedRoute";
 import { NetworkContent } from "@/components/network/network-content";
 import { NetworkSidebar } from "@/components/network/network-sidebar";
 
 export default function NetworkPage() {
+  useProtectedRoute(); // Redirect to login if not authenticated
+  
   return (
     <div className="min-h-screen bg-background">
       <Header />

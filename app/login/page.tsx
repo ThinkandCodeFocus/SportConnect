@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -8,9 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
+  const router = useRouter();
   const { login, isLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
@@ -56,8 +58,17 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
+      <div className="w-full max-w-md">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.back()}
+          className="mb-4"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <Card>
+          <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 bg-primary rounded-xl flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-2xl">SC</span>
@@ -65,7 +76,7 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
           <CardDescription>
-            Connectez-vous à votre compte SportConnect
+            Connectez-vous à votre compte GalsenFoot
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -115,7 +126,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -134,7 +145,7 @@ export default function LoginPage() {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-card px-2 text-muted-foreground">
-                  Nouveau sur SportConnect ?
+                  Nouveau sur GalsenFoot ?
                 </span>
               </div>
             </div>
@@ -177,6 +188,7 @@ export default function LoginPage() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

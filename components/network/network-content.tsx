@@ -109,7 +109,7 @@ export function NetworkContent() {
     try {
       const [connectionsRes, pendingRes] = await Promise.all([
         api.connection.getByUser(currentUser.id),
-        api.connection.getPending(),
+        api.connection.getPending(currentUser.id),
       ]);
       
       setConnections(connectionsRes.data);
@@ -147,7 +147,7 @@ export function NetworkContent() {
     if (!currentUser) return;
     
     try {
-      await api.connection.send({ userId, requesterId: currentUser.id });
+      await api.connection.send({ requesterId: currentUser.id, addresseeId: userId });
       alert("Demande de connexion envoyée");
     } catch (err: any) {
       console.error("Failed to send request:", err);
@@ -157,7 +157,7 @@ export function NetworkContent() {
 
   const handleRemoveConnection = async (connectionId: string) => {
     try {
-      await api.connection.delete(connectionId);
+      await api.connection.cancel(connectionId);
       setConnections(connections.filter(c => c.id !== connectionId));
       setShowRemoveDialog(false);
       setSelectedPerson(null);

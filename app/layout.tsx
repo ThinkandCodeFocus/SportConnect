@@ -9,7 +9,7 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'SportConnect - Le Réseau Professionnel du Sport',
+  title: 'GalsenFoot - Le Réseau Professionnel du Football Africain',
   description: 'La plateforme professionnelle dédiée au monde du sport. Connectez-vous avec des joueurs, entraîneurs, agents, clubs et académies.',
   generator: 'v0.app',
   icons: {

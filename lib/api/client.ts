@@ -79,6 +79,8 @@ apiClient.interceptors.response.use(
       normalizedMessage = "Problème de Connexion - Le serveur met trop de temps à répondre";
     } else if (normalizedMessage.includes("Network") || normalizedMessage.includes("ECONNREFUSED")) {
       normalizedMessage = "Problème de Connexion - Vérifiez votre connexion internet";
+    } else if (error.response?.status === 403) {
+      normalizedMessage = "Accès refusé - Vous n'avez pas les permissions nécessaires";
     }
 
     // Handle 401 Unauthorized

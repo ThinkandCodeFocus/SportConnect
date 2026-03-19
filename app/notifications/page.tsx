@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProtectedRoute } from "@/lib/hooks/useProtectedRoute";
 import api from "@/lib/api/endpoints";
 import { Notification } from "@/lib/types/api";
 import { formatDistanceToNow } from "date-fns";
@@ -36,6 +37,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function NotificationsPage() {
+  useProtectedRoute(); // Redirect to login if not authenticated
+  
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);

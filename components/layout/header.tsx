@@ -91,7 +91,7 @@ export function Header() {
               <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm sm:text-lg">SC</span>
               </div>
-              <span className="hidden xl:block font-semibold text-foreground text-sm sm:text-base">SportConnect</span>
+              <span className="hidden xl:block font-semibold text-foreground text-sm sm:text-base">GalsenFoot</span>
             </Link>
             <div className={`relative flex-1 transition-all ${searchFocused ? "lg:flex-none lg:w-80" : ""}`}>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
@@ -105,7 +105,8 @@ export function Header() {
             </div>
           </div>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - Only for authenticated users */}
+          {isAuthenticated && (
           <nav className="hidden lg:flex items-center gap-1">
             {navItems.map((item) => (
               <Link
@@ -126,6 +127,7 @@ export function Header() {
               </Link>
             ))}
           </nav>
+          )}
 
           {/* User Menu / Auth Buttons */}
           <div className="flex items-center gap-2">
@@ -206,7 +208,7 @@ export function Header() {
                 <Button variant="ghost" asChild>
                   <Link href="/login">Se connecter</Link>
                 </Button>
-                <Button asChild>
+                <Button asChild className="bg-green-600 hover:bg-green-700 text-white font-semibold">
                   <Link href="/register">S'inscrire</Link>
                 </Button>
               </div>

@@ -157,7 +157,7 @@ export function NetworkSidebar() {
             Aide
           </Link>
         </div>
-        <p className="text-muted-foreground">SportConnect Corporation 2026</p>
+        <p className="text-muted-foreground">GalsenFoot Corporation 2026</p>
       </div>
     </div>
   );

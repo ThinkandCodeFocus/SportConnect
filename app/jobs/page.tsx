@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useProtectedRoute } from "@/lib/hooks/useProtectedRoute";
 import api from "@/lib/api/endpoints";
 import { Job } from "@/lib/types/api";
 import { Header } from "@/components/layout/header";
@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function JobsPage() {
-  const { isAuthenticated } = useAuth();
+  const { isCheckingAuth, canAccess } = useProtectedRoute();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,8 +25,9 @@ export default function JobsPage() {
   const [selectedSport, setSelectedSport] = useState<string>("all");
 
   useEffect(() => {
+    if (!canAccess) return;
     loadJobs();
-  }, []);
+  }, [canAccess]);
 
   useEffect(() => {
     applyFilters();
@@ -82,6 +83,14 @@ export default function JobsPage() {
     };
     return labels[type] || type;
   };
+
+  if (isCheckingAuth || !canAccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
